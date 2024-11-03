@@ -17,6 +17,7 @@ public class JuntaDeAndaluciaEventScraper : IEventScraper
 
     _driver = new ChromeDriver(options);
   }
+  
   public List<Event> ScrapeEvents()
   {
     var eventsData = new List<Event>();
@@ -26,14 +27,26 @@ public class JuntaDeAndaluciaEventScraper : IEventScraper
     
     foreach (var element in elements)
     {
-      var name = element.FindElement(By.CssSelector("article > div > div:nth-child(2) > div:nth-child(1)")).Text;
-      var day = element.FindElement(By.CssSelector("div.relative > div > div > div > div.text-4xl.font-light")).Text;
-      var month = element.FindElement(
-        By.CssSelector("div.relative > div > div > div > div:nth-child(2) > div.text-sm.leading-tight.uppercase")).Text;
-      var year = element.FindElement(By.CssSelector("div.relative > div > div > div > div:nth-child(2) > div.text-xs.leading-none")).Text;
-      var date = DateTime.Parse($"{day} de {month} de {year}");
-      Console.WriteLine($"{name} - {date}");
+      var e = new Event();
+
+      try
+      {
+        e.Title = element.FindElement(By.CssSelector("article > div > div:nth-child(2) > div:nth-child(1)")).Text;
+        var day = element.FindElement(By.CssSelector("div.relative > div > div > div > div.text-4xl.font-light")).Text;
+        var month = element.FindElement(
+          By.CssSelector("div.relative > div > div > div > div:nth-child(2) > div.text-sm.leading-tight.uppercase")).Text;
+        var year = element.FindElement(By.CssSelector("div.relative > div > div > div > div:nth-child(2) > div.text-xs.leading-none")).Text;
+        e.Location = element.FindElement(By.CssSelector(
+          "article > div > div.p-4.flex-1 > div:nth-child(2) > div.text-accent.text_base > a")).Text;
+        e.Date = DateTime.Parse($"{day} de {month} de {year}");
+        eventsData.Add(e);
+      }
+      catch (Exception exception)
+      {
+        Console.WriteLine(exception);
+      }
     }
+    
     _driver.Quit();
     return eventsData;
   }
